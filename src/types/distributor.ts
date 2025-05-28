@@ -37,4 +37,5 @@ export interface ClaimState {
   amountLocked: string;
   proof: any[];
   clawedBack: boolean;
+  claimOnce: boolean;
 }

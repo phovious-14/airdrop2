@@ -14,18 +14,20 @@ const createClaimState = (
   amountUnlocked: string | number,
   amountLocked: string | number,
   proof: any[] = [],
-  clawedBack: boolean = false
+  clawedBack: boolean = false,
+  claimOnce: boolean = false
 ): ClaimState => ({
   eligible,
   claimed,
   amountUnlocked:
     typeof amountUnlocked === "number"
-      ? amountUnlocked.toString()
+      ? amountUnlocked.toFixed(9)
       : amountUnlocked,
   amountLocked:
-    typeof amountLocked === "number" ? amountLocked.toString() : amountLocked,
+    typeof amountLocked === "number" ? amountLocked.toFixed(9) : amountLocked,
   proof,
   clawedBack,
+  claimOnce,
 });
 
 export const useAirdrop = () => {
@@ -37,7 +39,7 @@ export const useAirdrop = () => {
 
   // State for tracking claim status and amounts
   const [claim, setClaim] = useState<ClaimState>(
-    createClaimState(false, false, "0", "0")
+    createClaimState(false, false, "0", "0", [], false, false)
   );
 
   // Loading states for different operations
@@ -112,7 +114,7 @@ export const useAirdrop = () => {
         console.log(distributors[0]);
 
         if (distributors[0]?.clawedBack) {
-          setClaim(createClaimState(false, false, "0", "0", [], true));
+          setClaim(createClaimState(false, false, "0", "0", [], true, false));
           return;
         }
 
@@ -125,6 +127,17 @@ export const useAirdrop = () => {
 
         console.log(claims[0]);
 
+        if (
+          distributors[0]?.claimsLimit &&
+          claims[0] &&
+          "claimsCount" in claims[0] &&
+          claims[0].claimsCount === 1
+        ) {
+          setClaim(createClaimState(false, false, "0", "0", [], false, true));
+          setIsLoading((prev) => ({ ...prev, search: false }));
+          return;          
+        }
+
         const res = await fetch(
           `https://staging-api-public.streamflow.finance/v2/api/airdrops/${airdropId}/claimants/${wallet.publicKey?.toBase58()}`
         );
@@ -132,7 +145,7 @@ export const useAirdrop = () => {
         const data = await res.json();
 
         if (data.code === "CLAIMANT_DOES_NOT_EXIST") {
-          setClaim(createClaimState(false, false, "0", "0"));
+          setClaim(createClaimState(false, false, "0", "0", [], false, false));
           setIsLoading((prev) => ({ ...prev, search: false }));
           return;
         }
@@ -166,12 +179,19 @@ export const useAirdrop = () => {
       //if user eligible for airdrop
 
       if (claims[0] && "state" in claims[0]) {
-
         //if user claimed airdrop
-        setClaim(createClaimState(true, true, "0", amountLocked, data.proof));
-
+        setClaim(
+          createClaimState(
+            true,
+            true,
+            "0",
+            amountLocked,
+            data.proof,
+            false,
+            false
+          )
+        );
       } else {
-
         // not claimed yet
         const amountUnlocked =
           Number(data.amountUnlocked.toString()) / LAMPORTS_PER_SOL;
@@ -181,14 +201,25 @@ export const useAirdrop = () => {
             false,
             amountUnlocked,
             amountLocked,
-            data.proof
+            data.proof,
+            false,
+            false
           )
         );
       }
     } else {
-
       //not eligible
-      setClaim(createClaimState(false, false, "0", amountLocked, data.proof));
+      setClaim(
+        createClaimState(
+          false,
+          false,
+          "0",
+          amountLocked,
+          data.proof,
+          false,
+          false
+        )
+      );
     }
   };
 
@@ -201,20 +232,34 @@ export const useAirdrop = () => {
       Number(data.amountLocked.toString()) / LAMPORTS_PER_SOL;
 
     if (claims[0] === null && "proof" in data) {
-
       //check user eligible or not and if yes then allow set state for claim airdrop
       const amountUnlocked =
         Number(data.amountUnlocked.toString()) / LAMPORTS_PER_SOL;
       setClaim(
-        createClaimState(true, false, amountUnlocked, amountLocked, data.proof)
+        createClaimState(
+          true,
+          false,
+          amountUnlocked,
+          amountLocked,
+          data.proof,
+          false,
+          false
+        )
       );
     } else if ("state" in claims[0]) {
-
       //if user claimed unlocked amount for particular duration
-      setClaim(createClaimState(true, true, "0", amountLocked, data.proof));
-
+      setClaim(
+        createClaimState(
+          true,
+          true,
+          "0",
+          amountLocked,
+          data.proof,
+          false,
+          false
+        )
+      );
     } else if ("unlockedAmount" in claims[0] && distributor) {
-
       //calculate unlocked amount based on cliff, startTS, endTS and total amount, then get available amount to claim
       const currentTimestamp = Math.floor(Date.now() / 1000);
       const startTs = Number(distributor.startTs?.toString() || "0");
@@ -242,11 +287,29 @@ export const useAirdrop = () => {
         Number(availableToClaim.toString()) / LAMPORTS_PER_SOL;
 
       setClaim(
-        createClaimState(true, false, amountUnlocked, amountLocked, data.proof)
+        createClaimState(
+          true,
+          false,
+          amountUnlocked,
+          amountLocked,
+          data.proof,
+          false,
+          false
+        )
       );
     } else if (claims[0] === null) {
       //not eligible for airdrop
-      setClaim(createClaimState(false, false, "0", amountLocked, data.proof));
+      setClaim(
+        createClaimState(
+          false,
+          false,
+          "0",
+          amountLocked,
+          data.proof,
+          false,
+          false
+        )
+      );
     }
   };
 
@@ -265,7 +328,6 @@ export const useAirdrop = () => {
     };
 
     try {
-
       //claim airdrop based on setClaim state
       const claimRes = await client.claim(
         {
@@ -280,7 +342,6 @@ export const useAirdrop = () => {
       );
 
       if (claimRes) {
-        
         //refetch after airdrop token claimed
         await getAirdrops(distributorInfo.publicKey);
       }
