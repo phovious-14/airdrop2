@@ -111,8 +111,6 @@ export const useAirdrop = () => {
 
         setDistributorInfo(formattedDistributor);
 
-        console.log(distributors[0]);
-
         if (distributors[0]?.clawedBack) {
           setClaim(createClaimState(false, false, "0", "0", [], true, false));
           return;
@@ -124,8 +122,6 @@ export const useAirdrop = () => {
             recipient: wallet.publicKey?.toBase58(),
           },
         ]);
-
-        console.log(claims[0]);
 
         if (
           distributors[0]?.claimsLimit &&
