@@ -72,6 +72,16 @@ export default function Airdrop() {
         </div>
       );
     }
+    if (Number(claim.amountLocked) > 0) {
+      return (
+        <div className="text-gray-500 font-medium text-center">
+          Next open in{" "}
+          {formatDuration(
+            Number(distributorInfo?.account.unlockPeriod || 0)
+          )}
+        </div>
+      );
+    }
     if (!claim.eligible && !claim.clawedBack && !claim.claimOnce) {
       return (
         <div className="text-red-500 font-medium text-center">
