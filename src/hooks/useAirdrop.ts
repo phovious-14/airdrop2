@@ -107,14 +107,6 @@ export const useAirdrop = () => {
             name: "Solana",
             symbol: "SOL",
           },
-          "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU": {
-            name: "USD Coin",
-            symbol: "USDC",
-          },
-          Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB: {
-            name: "USD Tether",
-            symbol: "USDT",
-          },
         };
 
         // Check if it's a known token
