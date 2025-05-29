@@ -1,15 +1,19 @@
 import { DistributorInfo as DistributorInfoType } from "../types/distributor";
 import { formatDuration, formatUsdValue } from "../utils/formatters";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { convertRawToTokenAmount } from "../utils/token";
 
 interface DistributorInfoProps {
   distributorInfo: DistributorInfoType;
   solPrice: number;
+  tokenSymbol?: string;
+  tokenDecimals?: number;
 }
 
 export const DistributorInfo = ({
   distributorInfo,
   solPrice,
+  tokenSymbol = "SOL",
+  tokenDecimals = 9,
 }: DistributorInfoProps) => {
   return (
     <div className="mt-6 overflow-hidden rounded-lg border border-gray-200 shadow-sm">
@@ -34,18 +38,24 @@ export const DistributorInfo = ({
                 Total Claimed
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {Number(distributorInfo.account.totalAmountClaimed) /
-                  LAMPORTS_PER_SOL}{" "}
+                {convertRawToTokenAmount(
+                  distributorInfo.account.totalAmountClaimed,
+                  tokenDecimals
+                )}{" "}
                 /{" "}
-                {Number(distributorInfo.account.maxTotalClaim) /
-                  LAMPORTS_PER_SOL}{" "}
-                SOL
+                {convertRawToTokenAmount(
+                  distributorInfo.account.maxTotalClaim,
+                  tokenDecimals
+                )}{" "}
+                {tokenSymbol}
                 {solPrice > 0 && (
                   <span className="ml-2 text-gray-400">
                     (
                     {formatUsdValue(
-                      Number(distributorInfo.account.totalAmountClaimed) /
-                        LAMPORTS_PER_SOL,
+                      convertRawToTokenAmount(
+                        distributorInfo.account.totalAmountClaimed,
+                        tokenDecimals
+                      ),
                       solPrice
                     )}
                     )

@@ -3,11 +3,13 @@ import { formatUsdValue } from "../utils/formatters";
 interface AllocationInfoProps {
   amountUnlocked: string;
   solPrice: number;
+  tokenSymbol?: string;
 }
 
 export const AllocationInfo = ({
   amountUnlocked,
   solPrice,
+  tokenSymbol = "SOL",
 }: AllocationInfoProps) => {
   return (
     <div className="mt-6 overflow-hidden rounded-lg border border-gray-200 shadow-sm">
@@ -22,7 +24,7 @@ export const AllocationInfo = ({
                 Claimable now
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {Number(amountUnlocked)} SOL
+                {Number(amountUnlocked)} {tokenSymbol}
                 <br />({formatUsdValue(Number(amountUnlocked), solPrice)})
               </td>
             </tr>
