@@ -76,9 +76,7 @@ export default function Airdrop() {
       return (
         <div className="text-gray-500 font-medium text-center">
           Next open in{" "}
-          {formatDuration(
-            Number(distributorInfo?.account.unlockPeriod || 0)
-          )}
+          {formatDuration(Number(distributorInfo?.account.unlockPeriod || 0))}
         </div>
       );
     }
@@ -185,8 +183,8 @@ export default function Airdrop() {
         </div>
 
         {distributorInfo ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+          <div className="flex flex-row gap-6 w-full">
+            <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 w-full">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">
                 Airdrop Information
               </h2>
@@ -252,44 +250,49 @@ export default function Airdrop() {
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                Your Allocation
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <div className="text-sm font-medium text-gray-500">
-                    Total Amount
+            {wallet.publicKey ? (
+              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 w-full">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                  Your Allocation
+                </h2>
+                <div className="space-y-4">
+                  <div>
+                    <div className="text-sm font-medium text-gray-500">
+                      Total Amount
+                    </div>
+                    <div className="text-lg font-semibold text-gray-900">
+                      {totalAmount} {tokenMetadata?.symbol || "SOL"}
+                      {solPrice > 0 ? (
+                        <span className="ml-2 text-sm text-gray-400">
+                          ({formatUsdValue(totalAmount, solPrice)})
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
-                  <div className="text-lg font-semibold text-gray-900">
-                    {totalAmount} {tokenMetadata?.symbol || "SOL"}
-                    {solPrice > 0 ? (
-                      <span className="ml-2 text-sm text-gray-400">
-                        ({formatUsdValue(totalAmount, solPrice)})
-                      </span>
-                    ) : null}
+                  <div>
+                    <div className="text-sm font-medium text-gray-500">
+                      Claimable Amount
+                    </div>
+                    <div className="text-lg font-semibold text-gray-900">
+                      {Number(claim.amountUnlocked)}{" "}
+                      {tokenMetadata?.symbol || "SOL"}
+                      {solPrice > 0 && (
+                        <span className="ml-2 text-sm text-gray-400">
+                          (
+                          {formatUsdValue(
+                            Number(claim.amountUnlocked),
+                            solPrice
+                          )}
+                          )
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  {renderClaimStatus()}
+                  {renderClaimButton()}
                 </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-500">
-                    Claimable Amount
-                  </div>
-                  <div className="text-lg font-semibold text-gray-900">
-                    {Number(claim.amountUnlocked)}{" "}
-                    {tokenMetadata?.symbol || "SOL"}
-                    {solPrice > 0 && (
-                      <span className="ml-2 text-sm text-gray-400">
-                        (
-                        {formatUsdValue(Number(claim.amountUnlocked), solPrice)}
-                        )
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {renderClaimStatus()}
-                {renderClaimButton()}
               </div>
-            </div>
+            ) : null}
           </div>
         ) : null}
       </div>

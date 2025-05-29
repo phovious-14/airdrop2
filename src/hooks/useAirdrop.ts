@@ -168,12 +168,6 @@ export const useAirdrop = () => {
         return;
       }
 
-      if (!wallet.publicKey) {
-        setError("Please connect your wallet first");
-        setIsLoading((prev) => ({ ...prev, search: false }));
-        return;
-      }
-
       try {
         const distributors = await client.getDistributors({
           ids: [airdropId],
@@ -213,6 +207,13 @@ export const useAirdrop = () => {
         }
 
         setDistributorInfo(formattedDistributor);
+
+        // Only fetch claim information if wallet is connected
+        if (!wallet.publicKey) {
+          setClaim(createClaimState(false, false, "0", "0", [], false, false));
+          setIsLoading((prev) => ({ ...prev, search: false }));
+          return;
+        }
 
         if (distributors[0]?.clawedBack) {
           setClaim(createClaimState(false, false, "0", "0", [], true, false));
